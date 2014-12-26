@@ -15,7 +15,7 @@ class Foo
     @my_attr = val
   end
 
-  validates_array_values :my_attr, inclusion: in: { ['a', 'b', 'c'] }
+  validates_array_values :my_attr, inclusion: { in: ['a', 'b', 'c'] }
 end
 
 describe ValidatesSerialized do
