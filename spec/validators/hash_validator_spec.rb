@@ -1,11 +1,10 @@
 require 'spec_helper'
 require 'ostruct'
 
-describe ActiveModel::Validations::ArrayValidator do
+describe ActiveModel::Validations::HashValidator do
   context "#validates_hash_values" do
     class ValidatorHashTestOne
       include ActiveModel::Validations
-      validates_hash_values :my_attr, presence: true, inclusion: { in: [1, 2, 3, 4] }
 
       def initialize(h={})
         h.each {|k,v| send("#{k}=",v)}
@@ -18,6 +17,8 @@ describe ActiveModel::Validations::ArrayValidator do
       def my_attr=(val)
         @my_attr = val
       end
+
+      validates_hash_values :my_attr, presence: true, inclusion: { in: [1, 2, 3, 4] }
     end
 
     describe "#validate" do

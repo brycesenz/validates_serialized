@@ -7,18 +7,28 @@ class Foo
     h.each {|k,v| send("#{k}=",v)}
   end
 
-  def my_attr
-    @my_attr ||= []
+  def my_array
+    @my_array ||= []
   end
 
-  def my_attr=(val)
-    @my_attr = val
+  def my_array=(val)
+    @my_array = val
   end
 
-  validates_array_values :my_attr, inclusion: { in: ['a', 'b', 'c'] }
+  validates_array_values :my_array, inclusion: { in: ['a', 'b', 'c'] }
 end
 
 describe ValidatesSerialized do
   describe "#validating array" do
+    it "accepts valid params" do
+      model = Foo.new(my_array: ['a', 'a', 'b'])
+      model.should be_valid
+    end
+
+    it "rejects invalid params" do
+      model = Foo.new(my_array: ['a', 'x', 'b'])
+      model.should_not be_valid
+      model.errors[:my_array].should eq(["is not included in the list"])
+    end
   end
 end

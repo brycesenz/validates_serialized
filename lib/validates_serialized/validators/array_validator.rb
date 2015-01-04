@@ -1,38 +1,25 @@
 module ActiveModel
   module Validations
-    class ArrayValidator < ::ActiveModel::EachValidator #:nodoc:
-      def initialize(*args, &block)
-        options = args.extract_options!
-        @validators = []
-        args.first.each do |klass|
-          validator = klass.new(options.dup, &block)
-          @validators << validator
-        end
-        super(options)
-      end
-
-      def validate(record)
-        attributes.each do |attribute|
-          array = record.read_attribute_for_validation(attribute)
-          raise TypeError, "#{array} is not an Array" unless array.is_a?(Array)
-          array.each_with_index do |value, index|
-            next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
-            # TODO: It would be great to add errors to the index of arrays, but it throws a method error
-            # validate_each(record, :"#{attribute}[#{index}]", value)
-            validate_each(record, attribute, value)
-          end
+    class ArrayValidator < SerializedValidator #:nodoc:
+      protected
+      def validate_serialized(record, attribute, serialized)
+        serialized.each do |value|
+          next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
+          validate_each(record, attribute, value)
         end
       end
 
-      def validate_each(record, attribute, value)
-        @validators.each do |validator|
-          validator.validate_each(record, attribute, value)
-        end
+      def type_check!(value)
+        raise TypeError, "#{value} is not an Array" unless value.is_a?(Array)
       end
     end
 
     module ClassMethods
       def validates_array_with(*args, &block)
+        # TODO: It would be nice for these to all make a call to 'validates_serialized_with'
+        #    so that there's more code re-use
+        # validates_serialized_with args.push(ArrayValidator), &block
+
         options = args.extract_options!
         options[:class] = self
 

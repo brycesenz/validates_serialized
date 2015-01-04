@@ -1,33 +1,16 @@
 module ActiveModel
   module Validations
-    class HashValidator < ::ActiveModel::EachValidator #:nodoc:
-      def initialize(*args, &block)
-        options = args.extract_options!
-        @validators = []
-        args.first.each do |klass|
-          validator = klass.new(options.dup, &block)
-          @validators << validator
-        end
-        super(options)
-      end
-
-      def validate(record)
-        attributes.each do |attribute|
-          hash = record.read_attribute_for_validation(attribute)
-          raise TypeError, "#{hash} is not a Hash" unless hash.is_a?(Hash)
-          hash.each_pair do |key, value|
-            next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
-            # TODO: It would be great to add errors to the keys, but it throws a method error
-            # validate_each(record, :"#{attribute}[#{key}]", value)
-            validate_each(record, attribute, value)
-          end
+    class HashValidator < SerializedValidator #:nodoc:
+      protected
+      def validate_serialized(record, attribute, serialized)
+        serialized.each_pair do |key, value|
+          next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
+          validate_each(record, attribute, value)
         end
       end
 
-      def validate_each(record, attribute, value)
-        @validators.each do |validator|
-          validator.validate_each(record, attribute, value)
-        end
+      def type_check!(value)
+        raise TypeError, "#{value} is not a Hash" unless value.is_a?(Hash)
       end
     end
 
