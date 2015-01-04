@@ -14,7 +14,7 @@ describe ValidateableHash do
   end
 
   describe "attributes" do
-    it "defines key_1 attribute", failing: true do
+    it "defines key_1 attribute" do
       subject.key_1.should eq("boy")
     end
 
