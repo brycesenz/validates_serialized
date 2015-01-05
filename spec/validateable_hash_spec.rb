@@ -21,6 +21,10 @@ describe ValidateableHash do
     it "defines key_2 attribute" do
       subject.key_2.should eq("girl")
     end
+
+    it "returns nil for non-existent key_3" do
+      subject.key_3.should be_nil
+    end
   end
 
   describe "validation block" do
@@ -39,11 +43,12 @@ describe ValidateableHash do
       subject.errors[:key_1].should eq(["is not included in the list"])
     end
 
-    it "raises error when validating non-existent property" do
+    it "is invalid when validating non-existent property" do
       subject.class_eval do
         validates :other_key, inclusion: { in: [ 'a', 'b', 'c' ] }
       end
-      expect { subject.valid? }.to raise_error(NoMethodError)
+      subject.should_not be_valid
+      subject.errors[:other_key].should eq(["is not included in the list"])
     end
   end
 end

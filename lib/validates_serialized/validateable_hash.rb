@@ -5,15 +5,11 @@ class ValidateableHash < Hash
 
   def initialize(hash)
     @hash = hash
-    define_attributes(hash)
   end
 
   private
-  def define_attributes(hash)
-    hash.each_pair do |key, value|
-      self.class.send(:define_method, "#{key}") do
-        value
-      end
-    end
+  def method_missing(method, *args, &block)
+    # Delegate all methods to access the hash
+    @hash[method]
   end
 end
