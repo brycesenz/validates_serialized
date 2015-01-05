@@ -15,7 +15,7 @@ module ActiveModel
     end
 
     module ClassMethods
-      def validates_array_with(*args, &block)
+      def validates_array_values_with(*args, &block)
         # TODO: It would be nice for these to all make a call to 'validates_serialized_with'
         #    so that there's more code re-use
         # validates_serialized_with args.push(ArrayValidator), &block
@@ -56,7 +56,7 @@ module ActiveModel
             raise ArgumentError, "Unknown validator: '#{key}'"
           end
 
-          validates_array_with(validator, defaults.merge(_parse_validates_options(options)))
+          validates_array_values_with(validator, defaults.merge(_parse_validates_options(options)))
         end
       end
 
@@ -67,7 +67,7 @@ module ActiveModel
       end
     end
 
-    def validates_array_with(*args, &block)
+    def validates_array_values_with(*args, &block)
       options = args.extract_options!
       args.each do |klass|
         validator = ArrayValidator.new(args, options, &block)

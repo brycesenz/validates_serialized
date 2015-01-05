@@ -89,10 +89,10 @@ describe ActiveModel::Validations::HashValidator do
     end
   end
 
-  context "with class #validates_hash_with" do
+  context "with class #validates_hash_values_with" do
     class ValidatorHashClassTest
       include ActiveModel::Validations
-      validates_hash_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
+      validates_hash_values_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
 
       def initialize(h={})
         h.each {|k,v| send("#{k}=",v)}
@@ -133,7 +133,7 @@ describe ActiveModel::Validations::HashValidator do
     end
   end
 
-  context "with instance #validates_hash_with" do
+  context "with instance #validates_hash_values_with" do
     class ValidatorHashInstanceTest
       include ActiveModel::Validations
 
@@ -151,7 +151,7 @@ describe ActiveModel::Validations::HashValidator do
       end
 
       def instance_validations
-        validates_hash_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
+        validates_hash_values_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
       end
     end
 

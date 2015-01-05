@@ -15,7 +15,7 @@ module ActiveModel
     end
 
     module ClassMethods
-      def validates_hash_with(*args, &block)
+      def validates_hash_values_with(*args, &block)
         options = args.extract_options!
         options[:class] = self
 
@@ -53,7 +53,7 @@ module ActiveModel
             raise ArgumentError, "Unknown validator: '#{key}'"
           end
 
-          validates_hash_with(validator, defaults.merge(_parse_validates_options(options)))
+          validates_hash_values_with(validator, defaults.merge(_parse_validates_options(options)))
         end
       end
 
@@ -64,7 +64,7 @@ module ActiveModel
       end
     end
 
-    def validates_hash_with(*args, &block)
+    def validates_hash_values_with(*args, &block)
       options = args.extract_options!
       args.each do |klass|
         validator = HashValidator.new(args, options, &block)

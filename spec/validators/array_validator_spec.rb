@@ -88,10 +88,10 @@ describe ActiveModel::Validations::ArrayValidator do
     end
   end
 
-  context "with class #validates_array_with" do
+  context "with class #validates_array_values_with" do
     class ValidatorClassTest
       include ActiveModel::Validations
-      validates_array_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
+      validates_array_values_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
 
       def initialize(h={})
         h.each {|k,v| send("#{k}=",v)}
@@ -132,7 +132,7 @@ describe ActiveModel::Validations::ArrayValidator do
     end
   end
 
-  context "with instance #validates_array_with" do
+  context "with instance #validates_array_values_with" do
     class ValidatorInstanceTest
       include ActiveModel::Validations
 
@@ -150,7 +150,7 @@ describe ActiveModel::Validations::ArrayValidator do
       end
 
       def instance_validations
-        validates_array_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
+        validates_array_values_with ::ActiveModel::Validations::PresenceValidator, attributes: [:my_attr]
       end
     end
 

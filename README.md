@@ -109,7 +109,7 @@ class Comment < ActiveRecord::Base
   ...
 
   serialize :ratings, Hash
-  validates_hash_with :ratings, numericality: { greater_than: 0 }
+  validates_hash_values_with :ratings, numericality: { greater_than: 0 }
 end
 
 # With valid hash
@@ -129,7 +129,7 @@ class Comment < ActiveRecord::Base
   ...
 
   serialize :tags, Array
-  validates_array_with :tags, length: { minimum: 4 }
+  validates_array_values_with :tags, length: { minimum: 4 }
 end
 
 # With valid hash

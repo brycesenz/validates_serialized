@@ -80,7 +80,7 @@ module ActiveModel
       #       raise ArgumentError, "Unknown validator: '#{key}'"
       #     end
 
-      #     validates_array_with(validator, defaults.merge(_parse_validates_options(options)))
+      #     validates_array_values_with(validator, defaults.merge(_parse_validates_options(options)))
       #   end
       # end
 
