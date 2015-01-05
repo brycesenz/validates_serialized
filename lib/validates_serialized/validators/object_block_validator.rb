@@ -1,6 +1,6 @@
 module ActiveModel
   module Validations
-    class HashBlockValidator < BlockValidator #:nodoc:
+    class ObjectBlockValidator < BlockValidator #:nodoc:
       def initialize(options, &block)
         @block = block
         @options = options
@@ -9,13 +9,12 @@ module ActiveModel
 
       private
       def validate_each(record, attribute, value)
-        raise TypeError, "#{attribute} is not a Hash" unless value.is_a?(Hash)
         error_hash = get_serialized_object_errors(value)
         add_errors_to_record(record, attribute, error_hash)
       end
 
       def get_serialized_object_errors(value)
-        serialized_object = ValidateableHash.new(value)
+        serialized_object = ValidateableObject.new(value)
         serialized_object.class_eval &@block
         serialized_object.valid?
         serialized_object.errors.messages
@@ -44,15 +43,15 @@ module ActiveModel
 
     module ClassMethods
       # Helper to accept arguments in the style of the +validates+ class method
-      def validates_hash_keys(*attr_names, &block)
+      def validates_serialized(*attr_names, &block)
         raise ArgumentError, "You need to supply at least one attribute" if attr_names.empty?
-        validates_with HashBlockValidator, _merge_attributes(attr_names), &block
+        validates_with ObjectBlockValidator, _merge_attributes(attr_names), &block
       end
 
-      def validates_hash_keys!(*attr_names, &block)
+      def validates_serialized!(*attr_names, &block)
         options = attr_names.extract_options!
         options[:strict] = true
-        validates_hash_keys(*(attr_names << options), &block)
+        validates_serialized(*(attr_names << options), &block)
       end
     end
   end
