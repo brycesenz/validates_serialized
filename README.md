@@ -59,8 +59,8 @@ class Family < ActiveRecord::Base
 
   serialize :father, Person
   validates_serialized :father do
-    validates :name, precence: true
-    validatse :age, numericality: { greater_than: 21 }
+    validates :name, presence: true
+    validates :age, numericality: { greater_than: 21 }
   end
 end
 ```
@@ -79,10 +79,68 @@ family.valid? #=> false
 family.errors[:father] #=> ["age must be greater than 13"]
 ```
 
-## Validating a serialized hash
+## Validating a serialized hash by keys
+```ruby
+class Comment < ActiveRecord::Base
+  include ActiveModel
+  ...
+
+  serialize :metadata, Hash
+  validates_hash_keys :metadata do
+    validates :timestamp, presence: true
+    validates :locale, presence: true
+  end
+end
+
+# With valid hash
+comment = Comment.new(metadata: { timestamp: Time.new(2014, 1, 1), locale: "Ohio" })
+comment.valid? #=> true
+
+# With invalid hash
+comment = Comment.new(metadata: { timestamp: Time.new(2014, 1, 1), locale: nil })
+comment.valid? #=> false
+comment.errors[:metadata] #=> ["locale can't be blank"]
+```
+
+## Validating serialized hash values
+```ruby
+class Comment < ActiveRecord::Base
+  include ActiveModel
+  ...
+
+  serialize :ratings, Hash
+  validates_hash_with :ratings, numericality: { greater_than: 0 }
+end
+
+# With valid hash
+comment = Comment.new(ratings: { tom: 4, jim: 2 })
+comment.valid? #=> true
+
+# With invalid hash
+comment = Comment.new(ratings: { tom: 4, jim: -1 })
+comment.valid? #=> false
+comment.errors[:ratings] #=> ["ratings must be greater than 0"]
+```
 
 ## Validating a serialized array
+```ruby
+class Comment < ActiveRecord::Base
+  include ActiveModel
+  ...
 
+  serialize :tags, Array
+  validates_array_with :tags, length: { minimum: 4 }
+end
+
+# With valid hash
+comment = Comment.new(tags: ["ruby" "rails"])
+comment.valid? #=> true
+
+# With invalid hash
+comment = Comment.new(tags: ["ruby" "rails", "ror"])
+comment.valid? #=> false
+comment.errors[:tags] #=> ["tags is too short (minimum is 4 characters)"]
+```
 
 ## Contributing
 
