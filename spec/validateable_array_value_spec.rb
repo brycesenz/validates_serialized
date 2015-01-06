@@ -23,8 +23,8 @@ describe ValidateableArrayValue do
       expect { subject.object_id }.not_to raise_error
     end
 
-    it "raises error for non-existent methods" do
-      expect { subject.arglebargle }.to raise_error(NoMethodError)
+    it "does not raise error for non-existent methods" do
+      expect { subject.arglebargle }.not_to raise_error
     end
   end
 end

@@ -10,5 +10,6 @@ class ValidateableObject
   private
   def method_missing(method, *args, &block)
     @object.send(method, *args, &block)
+  rescue NoMethodError => e
   end
 end

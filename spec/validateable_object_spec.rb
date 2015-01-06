@@ -48,8 +48,8 @@ describe ValidateableObject do
       expect { subject.object_id }.not_to raise_error
     end
 
-    it "raises error for non-existent methods" do
-      expect { subject.arglebargle }.to raise_error(NoMethodError)
+    it "does not raise error for non-existent methods" do
+      expect { subject.arglebargle }.not_to raise_error
     end
   end
 
@@ -74,7 +74,7 @@ describe ValidateableObject do
       subject.class_eval do
         validates :other_property, inclusion: { in: [ 'a', 'b', 'c' ] }
       end
-      expect { subject.valid? }.to raise_error(NoMethodError)
+      expect { subject.valid? }.not_to raise_error
     end
   end
 end

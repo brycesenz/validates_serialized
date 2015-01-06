@@ -10,6 +10,5 @@ class ValidateableHash < ValidateableObject
     else
       super
     end
-  rescue NoMethodError => e
   end
 end

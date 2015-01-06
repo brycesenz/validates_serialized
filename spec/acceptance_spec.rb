@@ -103,9 +103,9 @@ describe ValidatesSerialized do
     model.should be_valid
   end
 
-  it "raises error without Serialized author" do
+  it "is invalid without Serialized author" do
     model = Blog.new(ratings: [1, 3, 1], comments: { admin: "This is great!" })
-    expect { model.valid? }.to raise_error
+    model.should_not be_valid
   end
 
   it "is invalid without author name" do
