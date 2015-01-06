@@ -37,6 +37,14 @@ class Blog
     @ratings = val
   end
 
+  def tags
+    @tags
+  end
+
+  def tags=(val)
+    @tags = val
+  end
+
   def comments
     @comments
   end
@@ -45,12 +53,32 @@ class Blog
     @comments = val
   end
 
+  def metadata
+    @metadata
+  end
+
+  def metadata=(val)
+    @metadata = val
+  end
+
   validates_serialized :author do
     validates :name, presence: true
   end
+
   validates_array_values :ratings, inclusion: { in: [1, 2, 3] }
+
+  validates_each_in_array :tags, if: :tags do
+    validates :value, length: { in: 4..20 }
+  end
+
   validates_hash_keys :comments, allow_blank: true do 
     validates :admin, presence: true
+  end
+
+  validates_each_in_array :metadata, if: :metadata do
+    validates_hash_keys :value do 
+      validates :timestamp, presence: true
+    end
   end
 end
 
@@ -62,6 +90,16 @@ describe ValidatesSerialized do
 
   it "is valid without comments" do
     model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"))
+    model.should be_valid
+  end
+
+  it "is valid with valid tags" do
+    model = Blog.new(ratings: [1, 3], author: Author.new(name: "Tom"), comments: { admin: "This is great!" }, tags: ["sweet", "awesome"])
+    model.should be_valid
+  end
+
+  it "is valid with valid metadata" do
+    model = Blog.new(ratings: [1, 3], author: Author.new(name: "Tom"), comments: { admin: "This is great!" }, metadata: [{timestamp: Time.new(2014, 1, 2)}, {timestamp: Time.new(2014, 2, 2)}])
     model.should be_valid
   end
 
@@ -91,5 +129,11 @@ describe ValidatesSerialized do
     model = Blog.new(ratings: [1, 8], author: Author.new(name: "Tom"), comments: { admin: "This is great!" })
     model.should_not be_valid
     model.errors[:ratings].should eq(["is not included in the list"])
+  end
+
+  it "is invalid with invalid tags" do
+    model = Blog.new(ratings: [1, 3], author: Author.new(name: "Tom"), comments: { admin: "This is great!" }, tags: ["sweet", "awesome", "i"])
+    model.should_not be_valid
+    model.errors[:tags].should eq(["tags has a value that is too short (minimum is 4 characters)"])
   end
 end
