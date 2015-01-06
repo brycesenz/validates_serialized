@@ -25,6 +25,14 @@ describe ValidateableHash do
     it "returns nil for non-existent key_3" do
       subject.key_3.should be_nil
     end
+
+    it "delegates object methods without error" do
+      expect { subject.object_id }.not_to raise_error
+    end
+
+    it "does not raises error for non-existent methods" do
+      expect { subject.arglebargle }.not_to raise_error
+    end
   end
 
   describe "validation block" do

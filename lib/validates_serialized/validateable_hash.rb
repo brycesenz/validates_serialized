@@ -1,15 +1,15 @@
 require 'active_model'
 
-class ValidateableHash < Hash
+class ValidateableHash < ValidateableObject
   include ::ActiveModel::Validations
-
-  def initialize(hash)
-    @hash = hash
-  end
 
   private
   def method_missing(method, *args, &block)
-    # Delegate all methods to access the hash
-    @hash[method]
+    if @object.keys.include?(method)
+      @object[method]
+    else
+      super
+    end
+  rescue NoMethodError => e
   end
 end
