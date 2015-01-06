@@ -122,7 +122,7 @@ comment.valid? #=> false
 comment.errors[:ratings] #=> ["ratings must be greater than 0"]
 ```
 
-## Validating a serialized array
+## Validating a serialized array (syntax #1)
 ```ruby
 class Comment < ActiveRecord::Base
   include ActiveModel
@@ -130,6 +130,28 @@ class Comment < ActiveRecord::Base
 
   serialize :tags, Array
   validates_array_values_with :tags, length: { minimum: 4 }
+end
+
+# With valid hash
+comment = Comment.new(tags: ["ruby" "rails"])
+comment.valid? #=> true
+
+# With invalid hash
+comment = Comment.new(tags: ["ruby" "rails", "ror"])
+comment.valid? #=> false
+comment.errors[:tags] #=> ["tags is too short (minimum is 4 characters)"]
+```
+
+## Validating a serialized array (syntax #2)
+```ruby
+class Comment < ActiveRecord::Base
+  include ActiveModel
+  ...
+
+  serialize :tags, Array
+  validates_each_in_array :tags do
+    validates :value, length: { minimum: 4 } #the attribute 'value' with access each value
+  end
 end
 
 # With valid hash
