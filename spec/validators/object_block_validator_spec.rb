@@ -65,6 +65,14 @@ describe ActiveModel::Validations::ObjectBlockValidator do
         record.errors[:my_attr].should eq(["name can't be blank", "age is not included in the list"])
       end
     end
+
+    describe "clearing ValidateableObject validators" do
+      it "clears validators after validation" do
+        record = ValidatorBlockObjectTestOne.new(my_attr: Foo.new(name: nil, age: 9))
+        record.valid?
+        ValidateableObject.validators.should be_empty        
+      end
+    end
   end
 
   context "#validates_serialized!" do
@@ -104,6 +112,14 @@ describe ActiveModel::Validations::ObjectBlockValidator do
       it "raises error for multiple invalid value" do
         record = ValidatorBlockObjectTestStrict.new(my_attr: Foo.new(name: nil, age: 9))
         expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "name can't be blank")
+      end
+    end
+
+    describe "clearing ValidateableObject validators" do
+      it "clears validators after validation" do
+        record = ValidatorBlockObjectTestStrict.new(my_attr: Foo.new(name: "Jim", age: 3))
+        record.valid?
+        ValidateableObject.validators.should be_empty        
       end
     end
   end

@@ -2,7 +2,6 @@ module ActiveModel
   module Validations
     class ArrayBlockValidator < BlockValidator #:nodoc:
       def initialize(options, &block)
-        @block = block
         @options = options
         super
       end
@@ -14,10 +13,21 @@ module ActiveModel
         add_errors_to_record(record, attribute, errors)
       end
 
+      def build_serialized_object(value)
+        #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash        
+        temp_class = Class.new(ValidateableArrayValue)
+        temp_class_name = "ValidateableArrayValue_#{SecureRandom.hex}"
+        if self.class.constants.include?(temp_class_name)
+          self.class.send(:remove_const, temp_class_name)
+        end
+        self.class.const_set(temp_class_name, temp_class)
+        temp_class.new(value)
+      end
+
       def get_serialized_object_errors(array)
         messages = []
         array.each do |value|
-          serialized_object = ValidateableArrayValue.new(value)
+          serialized_object = build_serialized_object(value)
           serialized_object.class_eval &@block
           serialized_object.valid?
           message = serialized_object.errors.messages[:value]
@@ -29,8 +39,7 @@ module ActiveModel
       def add_errors_to_record(record, attribute, error_array)
         error_array.each do |value|
           text = value.join(", ")
-          message = "#{attribute} has a value that #{text}"
-          record.errors.add(attribute, message)
+          record.errors.add(attribute, "#{attribute} has a value that #{text}")
         end
         if exception = options[:strict]
           exception = ActiveModel::StrictValidationFailed if exception == true
@@ -38,14 +47,6 @@ module ActiveModel
           raise exception, exception_message unless exception_message.blank?
         end
       end
-
-      # def get_message_from_error_hash(error_hash)
-      #   message = nil
-      #   error_hash.each_pair do |key, array|
-      #     message = array.join(", ")
-      #   end
-      #   message
-      # end
     end
 
     module ClassMethods

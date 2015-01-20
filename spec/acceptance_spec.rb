@@ -71,14 +71,14 @@ class Blog
     validates :value, length: { in: 4..20 }
   end
 
-  validates_hash_keys :comments, allow_blank: true do 
-    validates :admin, presence: true
-  end
-
   validates_each_in_array :metadata, if: :metadata do
     validates_hash_keys :value do 
       validates :timestamp, presence: true
     end
+  end
+
+  validates_hash_keys :comments, allow_blank: true do 
+    validates :admin, presence: true
   end
 end
 

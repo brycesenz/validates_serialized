@@ -2,7 +2,6 @@ module ActiveModel
   module Validations
     class HashBlockValidator < BlockValidator #:nodoc:
       def initialize(options, &block)
-        @block = block
         @options = options
         super
       end
@@ -14,8 +13,19 @@ module ActiveModel
         add_errors_to_record(record, attribute, error_hash)
       end
 
+      def build_serialized_object(value)
+        #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash        
+        temp_class = Class.new(ValidateableHash)
+        temp_class_name = "TempValidateableHash_#{SecureRandom.hex}"
+        if self.class.constants.include?(temp_class_name)
+          self.class.send(:remove_const, temp_class_name)
+        end
+        self.class.const_set(temp_class_name, temp_class)
+        temp_class.new(value)
+      end
+
       def get_serialized_object_errors(value)
-        serialized_object = ValidateableHash.new(value)
+        serialized_object = build_serialized_object(value)
         serialized_object.class_eval &@block
         serialized_object.valid?
         serialized_object.errors.messages

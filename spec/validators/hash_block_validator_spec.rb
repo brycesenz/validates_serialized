@@ -48,6 +48,14 @@ describe ActiveModel::Validations::HashBlockValidator do
         expect { record.valid? }.to raise_error(TypeError, 'my_attr is not a Hash')
       end
     end
+
+    describe "clearing ValidateableHash validators" do
+      it "clears validators after validation" do
+        record = ValidatorBlockHashTestOne.new(my_attr: { first_key: 2, second_key: 4 })
+        record.valid?
+        ValidateableHash.validators.should be_empty        
+      end
+    end
   end
 
   context "#validates_hash_keys!" do
@@ -92,6 +100,14 @@ describe ActiveModel::Validations::HashBlockValidator do
       it "raises error for non-array" do
         record = ValidatorBlockHashTestStrict.new(my_attr: 4)
         expect { record.valid? }.to raise_error(TypeError, 'my_attr is not a Hash')
+      end
+    end
+
+    describe "clearing ValidateableHash validators" do
+      it "clears validators after validation" do
+        record = ValidatorBlockHashTestStrict.new(my_attr: {first_key: 2, second_key: 3})
+        record.valid?
+        ValidateableHash.validators.should be_empty        
       end
     end
   end
