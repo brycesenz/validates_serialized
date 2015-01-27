@@ -28,7 +28,7 @@ describe ActiveModel::Validations::HashValidator do
         record.errors[:my_attr].should eq([])
       end
 
-      it "adds error for invalid value" do
+      it "adds error for invalid value", failing: true do
         record = ValidatorHashTestOne.new(my_attr: { a: 1, b: 5 })
         record.valid?
         record.errors[:my_attr].should eq(["is not included in the list"])

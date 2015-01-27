@@ -11,17 +11,12 @@ module ActiveModel
         raise TypeError, "#{attribute} is not a Hash" unless value.is_a?(Hash)
         error_hash = get_serialized_object_errors(value)
         add_errors_to_record(record, attribute, error_hash)
+        ValidateableHash.clear_validators!
       end
 
       def build_serialized_object(value)
-        #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash        
-        temp_class = Class.new(ValidateableHash)
-        temp_class_name = "TempValidateableHash_#{SecureRandom.hex}"
-        if self.class.constants.include?(temp_class_name)
-          self.class.send(:remove_const, temp_class_name)
-        end
-        self.class.const_set(temp_class_name, temp_class)
-        temp_class.new(value)
+        ValidateableHash.clear_validators!
+        ValidateableHash.new(value)
       end
 
       def get_serialized_object_errors(value)

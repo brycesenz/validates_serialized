@@ -14,6 +14,20 @@ class Author
   end
 end
 
+class WebsiteUrl
+  def initialize(h={})
+    h.each {|k,v| send("#{k}=",v)}
+  end
+
+  def url
+    @url ||= nil
+  end
+
+  def url=(val)
+    @url = val
+  end
+end
+
 class Blog
   include ActiveModel::Validations
 
@@ -79,6 +93,10 @@ class Blog
 
   validates_hash_keys :comments, allow_blank: true do 
     validates :admin, presence: true
+  end
+
+  validates_hash_keys :data, allow_blank: true do
+    validates :url, presence: true, if: Proc.new{|f| f.required_data_field?(:url) }
   end
 end
 
