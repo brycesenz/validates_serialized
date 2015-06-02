@@ -164,6 +164,13 @@ comment.valid? #=> false
 comment.errors[:tags] #=> ["tags is too short (minimum is 4 characters)"]
 ```
 
+## Customizing error message for Array validation
+There is `activerecord.errors.messages.array_has_invalid_value` translation key available for Array validation errors.
+
+The two options are available in translation: `attribute` and `text`
+
+Default error message is: "#{attribute} has a value that #{text}"
+
 ## Contributing
 
 1. Fork it
