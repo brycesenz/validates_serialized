@@ -14,7 +14,7 @@ module ActiveModel
       end
 
       def build_serialized_object(value)
-        #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash        
+        #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash
         temp_class = Class.new(ValidateableArrayValue)
         temp_class_name = "ValidateableArrayValue_#{SecureRandom.hex}"
         if self.class.constants.include?(temp_class_name)
@@ -39,7 +39,12 @@ module ActiveModel
       def add_errors_to_record(record, attribute, error_array)
         error_array.each do |value|
           text = value.join(", ")
-          record.errors.add(attribute, "#{attribute} has a value that #{text}")
+          message = I18n.t("activerecord.errors.messages.array_has_invalid_value",
+            :attribute => attribute,
+            :text => text,
+            :default => "#{attribute} has a value that #{text}"
+          )
+          record.errors.add(attribute, message)
         end
         if exception = options[:strict]
           exception = ActiveModel::StrictValidationFailed if exception == true
