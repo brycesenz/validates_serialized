@@ -95,9 +95,9 @@ class Blog
     validates :admin, presence: true
   end
 
-  validates_hash_keys :data, allow_blank: true do
-    validates :url, presence: true, if: Proc.new{|f| f.required_data_field?(:url) }
-  end
+  # validates_hash_keys :data, allow_blank: true do
+  #   validates :url, presence: true, if: Proc.new{|f| f.required_data_field?(:url) }
+  # end
 end
 
 describe ValidatesSerialized do

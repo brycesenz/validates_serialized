@@ -109,7 +109,7 @@ class Comment < ActiveRecord::Base
   ...
 
   serialize :ratings, Hash
-  validates_hash_values_with :ratings, numericality: { greater_than: 0 }
+  validates_hash_values :ratings, numericality: { greater_than: 0 }
 end
 
 # With valid hash
