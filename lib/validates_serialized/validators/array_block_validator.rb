@@ -11,6 +11,23 @@ module ActiveModel
         raise TypeError, "#{attribute} is not an Array" unless array.is_a?(Array)
         errors = get_serialized_object_errors(array)
         add_errors_to_record(record, attribute, errors)
+
+        new_errors = {}
+
+        record.errors.each do |attr, value|
+          if attr.to_s.include?("value")
+            record.errors.delete(attr)
+            new_errors[attr.to_s.gsub(/value\.?/, "").to_sym] = value
+          else
+            new_errors[attr] = value
+          end
+        end
+
+        record.errors.clear
+
+        new_errors.each do |attr, value|
+          record.errors.add(attr, value)
+        end
       end
 
       def build_serialized_object(value)
@@ -25,31 +42,35 @@ module ActiveModel
       end
 
       def get_serialized_object_errors(array)
-        messages = []
-        array.each do |value|
+        messages = {}
+        array.each_with_index do |value, index|
           serialized_object = build_serialized_object(value)
           serialized_object.class_eval &@block
           serialized_object.valid?
-          message = serialized_object.errors.messages[:value]
-          messages << message unless message.blank?
+          message = serialized_object.errors.messages
+          messages[index] = message unless message.blank?
         end
         messages
       end
 
-      def add_errors_to_record(record, attribute, error_array)
-        error_array.each do |value|
-          text = value.join(", ")
-          message = I18n.t("activerecord.errors.messages.array_has_invalid_value",
-            :attribute => attribute,
-            :text => text,
-            :default => "#{attribute} has a value that #{text}"
-          )
-          record.errors.add(attribute, message)
-        end
-        if exception = options[:strict]
-          exception = ActiveModel::StrictValidationFailed if exception == true
-          exception_message = record.errors[attribute].join(", ")
-          raise exception, exception_message unless exception_message.blank?
+      def add_errors_to_record(record, attribute, error_hash)
+        error_hash.each do |index, value|
+          value.each do |subattribute, errors|
+            if subattribute == :value
+              field = "#{attribute}.#{index}"
+            elsif subattribute.to_s.include?("value")
+              attr = subattribute.to_s.gsub(/value\.?/, "").to_sym
+              field = "#{attribute}.#{index}.#{attr}"
+            else
+              field = "#{attribute}.#{index}.#{subattribute}"
+            end
+
+            if options[:strict] == true
+              raise ActiveModel::StrictValidationFailed, "#{field} #{errors.join(", ")}"
+            end
+
+            record.errors.add(field, errors.join(", "))
+          end
         end
       end
     end

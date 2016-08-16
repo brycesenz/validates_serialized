@@ -33,13 +33,14 @@ describe ActiveModel::Validations::ArrayBlockValidator do
       it "adds error for invalid value" do
         record = ValidatorBlockArrayTestOne.new(my_attr: [nil, 4])
         record.valid?
-        record.errors[:my_attr].should eq(["my_attr has a value that can't be blank"])
+        record.errors[:"my_attr.0"].should eq(["can't be blank"])
       end
 
       it "adds multiple errors for multiple invalid value" do
         record = ValidatorBlockArrayTestOne.new(my_attr: [nil, 4, nil])
         record.valid?
-        record.errors[:my_attr].should eq(["my_attr has a value that can't be blank", "my_attr has a value that can't be blank"])
+        record.errors[:"my_attr.0"].should eq(["can't be blank"])
+        record.errors[:"my_attr.2"].should eq(["can't be blank"])
       end
 
       it "raises error for non-array" do
@@ -52,7 +53,7 @@ describe ActiveModel::Validations::ArrayBlockValidator do
       it "clears validators after validation" do
         record = ValidatorBlockArrayTestOne.new(my_attr: [2, 4])
         record.valid?
-        ValidateableArrayValue.validators.should be_empty        
+        ValidateableArrayValue.validators.should be_empty
       end
     end
   end
@@ -87,12 +88,12 @@ describe ActiveModel::Validations::ArrayBlockValidator do
 
       it "raises error for invalid value" do
         record = ValidatorBlockArrayTestStrict.new(my_attr: [2, 5])
-        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, 'my_attr has a value that is not included in the list')
+        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, 'my_attr.1 is not included in the list')
       end
 
       it "raises error for multiple invalid value" do
         record = ValidatorBlockArrayTestStrict.new(my_attr: [nil, 9])
-        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "my_attr has a value that is not included in the list, my_attr has a value that is not included in the list")
+        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "my_attr.0 is not included in the list")
       end
 
       it "raises error for non-array" do
@@ -105,7 +106,7 @@ describe ActiveModel::Validations::ArrayBlockValidator do
       it "clears validators after validation" do
         record = ValidatorBlockArrayTestStrict.new(my_attr: [2, 3])
         record.valid?
-        ValidateableArrayValue.validators.should be_empty        
+        ValidateableArrayValue.validators.should be_empty
       end
     end
   end

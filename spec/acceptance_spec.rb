@@ -86,12 +86,12 @@ class Blog
   end
 
   validates_each_in_array :metadata, if: :metadata do
-    validates_hash_keys :value do 
+    validates_hash_keys :value do
       validates :timestamp, presence: true
     end
   end
 
-  validates_hash_keys :comments, allow_blank: true do 
+  validates_hash_keys :comments, allow_blank: true do
     validates :admin, presence: true
   end
 
@@ -135,7 +135,7 @@ describe ValidatesSerialized do
   it "is invalid without comment admin key" do
     model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"), comments: { other: "This is great!" })
     model.should_not be_valid
-    model.errors[:comments].should eq(["admin can't be blank"])
+    model.errors[:"comments.admin"].should eq(["can't be blank"])
   end
 
   it "raises error without ratings" do
@@ -152,6 +152,6 @@ describe ValidatesSerialized do
   it "is invalid with invalid tags" do
     model = Blog.new(ratings: [1, 3], author: Author.new(name: "Tom"), comments: { admin: "This is great!" }, tags: ["sweet", "awesome", "i"])
     model.should_not be_valid
-    model.errors[:tags].should eq(["tags has a value that is too short (minimum is 4 characters)"])
+    model.errors["tags.2"].should eq(["is too short (minimum is 4 characters)"])
   end
 end
