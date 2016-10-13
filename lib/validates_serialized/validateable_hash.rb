@@ -12,8 +12,10 @@ class ValidateableHash < ValidateableObject
 
   private
   def method_missing(method, *args, &block)
-    if @object.keys.include?(method)
+    if @object.key?(method)
       @object[method]
+    elsif @object.key?(method.to_s)
+      @object[method.to_s]
     else
       super
     end

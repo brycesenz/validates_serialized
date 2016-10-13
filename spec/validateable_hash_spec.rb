@@ -33,6 +33,12 @@ describe ValidateableHash do
     it "does not raises error for non-existent methods" do
       expect { subject.arglebargle }.not_to raise_error
     end
+    context "foo" do
+      let!(:hash) { {"key_1" => "boy"} }
+      it "defines key_1 attribute" do
+        subject.key_1.should eq("boy")
+      end
+    end
   end
 
   describe "validation block" do
