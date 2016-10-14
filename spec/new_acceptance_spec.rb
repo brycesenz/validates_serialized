@@ -47,7 +47,7 @@ describe Consumer do
   it "adds correct income_sources errors" do
     model = described_class.new(income_sources: [{ amount: -40 }])
     model.valid?
-    model.errors[:income_sources].should eq(["income_sources has a value that name can't be blank, amount must be greater than 0"])
+    model.errors["income_sources.0.amount"].should eq(["must be greater than 0"])
   end
 
   it "does not add error for valid credit_card" do
@@ -59,7 +59,8 @@ describe Consumer do
   it "adds correct credit_card errors" do
     model = described_class.new(credit_card: { number: "112233" })
     model.valid?
-    model.errors[:credit_card].should eq(["brand can't be blank, is not included in the list", "number is too short (minimum is 10 characters)"])
+    model.errors[:"credit_card.brand"].should eq(["can't be blank, is not included in the list"])
+    model.errors[:"credit_card.number"].should eq(["is too short (minimum is 10 characters)"])
   end
 
   # it "is valid without comments" do

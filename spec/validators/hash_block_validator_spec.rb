@@ -27,20 +27,20 @@ describe ActiveModel::Validations::HashBlockValidator do
     describe "#validate" do
       it "does not raise error for valid value" do
         record = ValidatorBlockHashTestOne.new(my_attr: { first_key: 2, second_key: 4 })
-        record.valid?
-        record.errors[:my_attr].should eq([])
+        expect(record).to be_valid
       end
 
       it "adds error for invalid value" do
         record = ValidatorBlockHashTestOne.new(my_attr: { first_key: nil, second_key: 4 })
         record.valid?
-        record.errors[:my_attr].should eq(["first_key can't be blank"])
+        record.errors[:"my_attr.first_key"].should eq(["can't be blank"])
       end
 
       it "adds multiple errors for multiple invalid value" do
         record = ValidatorBlockHashTestOne.new(my_attr: { first_key: nil, second_key: 6 })
         record.valid?
-        record.errors[:my_attr].should eq(["first_key can't be blank", "second_key is not included in the list"])
+        record.errors[:"my_attr.first_key"].should eq(["can't be blank"])
+        record.errors[:"my_attr.second_key"].should eq(["is not included in the list"])
       end
 
       it "raises error for non-array" do
@@ -53,7 +53,7 @@ describe ActiveModel::Validations::HashBlockValidator do
       it "clears validators after validation" do
         record = ValidatorBlockHashTestOne.new(my_attr: { first_key: 2, second_key: 4 })
         record.valid?
-        ValidateableHash.validators.should be_empty        
+        ValidateableHash.validators.should be_empty
       end
     end
   end
@@ -89,12 +89,12 @@ describe ActiveModel::Validations::HashBlockValidator do
 
       it "raises error for invalid value" do
         record = ValidatorBlockHashTestStrict.new(my_attr: {first_key: 2, second_key: 5})
-        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, 'second_key is not included in the list')
+        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, 'my_attr.second_key is not included in the list')
       end
 
       it "raises error for multiple invalid value" do
         record = ValidatorBlockHashTestStrict.new(my_attr: {first_key: nil, second_key: 9})
-        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "first_key can't be blank")
+        expect { record.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "my_attr.first_key can't be blank")
       end
 
       it "raises error for non-array" do
@@ -107,7 +107,7 @@ describe ActiveModel::Validations::HashBlockValidator do
       it "clears validators after validation" do
         record = ValidatorBlockHashTestStrict.new(my_attr: {first_key: 2, second_key: 3})
         record.valid?
-        ValidateableHash.validators.should be_empty        
+        ValidateableHash.validators.should be_empty
       end
     end
   end

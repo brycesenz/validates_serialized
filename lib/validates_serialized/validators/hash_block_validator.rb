@@ -28,13 +28,14 @@ module ActiveModel
 
       def add_errors_to_record(record, attribute, error_hash)
         error_hash.each_pair do |key, array|
-          text = array.join(", ")
-          message = "#{key} #{text}"
+          message = array.join(", ")
+
           if exception = options[:strict]
             exception = ActiveModel::StrictValidationFailed if exception == true
-            raise exception, message
+            raise exception, "#{attribute}.#{key} #{message}"
           end
-          record.errors.add(attribute, message)
+
+          record.errors.add("#{attribute}.#{key}", message)
         end
       end
 
