@@ -9,11 +9,11 @@ module ActiveModel
       private
       def validate_each(record, attribute, array)
         raise TypeError, "#{attribute} is not an Array" unless array.is_a?(Array)
-        errors = get_serialized_object_errors(array)
+        errors = get_serialized_object_errors(record, array)
         add_errors_to_record(record, attribute, errors)
       end
 
-      def build_serialized_object(value)
+      def build_serialized_object(record, value)
         #TODO: For the Rails 4 version, I can just clear_validators! on the ValidateableHash
         temp_class = Class.new(ValidateableArrayValue)
         temp_class_name = "ValidateableArrayValue_#{SecureRandom.hex}"
@@ -21,13 +21,13 @@ module ActiveModel
           self.class.send(:remove_const, temp_class_name)
         end
         self.class.const_set(temp_class_name, temp_class)
-        temp_class.new(value)
+        temp_class.new(record, value)
       end
 
-      def get_serialized_object_errors(array)
+      def get_serialized_object_errors(record, array)
         messages = []
         array.each do |value|
-          serialized_object = build_serialized_object(value)
+          serialized_object = build_serialized_object(record, value)
           serialized_object.class_eval &@block
           serialized_object.valid?
           message = serialized_object.errors.messages[:value]

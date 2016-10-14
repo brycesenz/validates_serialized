@@ -24,8 +24,9 @@ describe ValidateableObject do
   end
 
   let!(:object) { TestPerson.new(age: 26, name: "Thomas") }
+  let!(:record) { double }
 
-  subject { described_class.new(object) }
+  subject { described_class.new(record, object) }
 
   it "responds to valid?" do
     subject.should be_valid
@@ -61,7 +62,6 @@ describe ValidateableObject do
       end
       subject.should be_valid
     end
-
     it "handles errors when invalid" do
       subject.class_eval do
         validates :name, inclusion: { in: [ 'a', 'b', 'c' ] }
@@ -75,6 +75,26 @@ describe ValidateableObject do
         validates :other_property, inclusion: { in: [ 'a', 'b', 'c' ] }
       end
       expect { subject.valid? }.not_to raise_error
+    end
+
+    context "when if: :method is supplied" do
+      let!(:object) { TestPerson.new(age: 26) }
+      let!(:record) { double(if_method: true) }
+
+      it "validates false when if_method returns true and validation fails" do
+        subject.class_eval do
+          validates :name, presence: true, if: :if_method
+        end
+        subject.should_not be_valid
+      end
+
+      it "validates true when if_method returns false and validation fails" do
+        expect(record).to receive(:if_method).and_return(false)
+        subject.class_eval do
+          validates :name, presence: true, if: :if_method
+        end
+        subject.should be_valid
+      end
     end
   end
 end
