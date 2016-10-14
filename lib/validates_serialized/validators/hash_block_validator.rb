@@ -9,18 +9,40 @@ module ActiveModel
       private
       def validate_each(record, attribute, value)
         raise TypeError, "#{attribute} is not a Hash" unless value.is_a?(Hash)
-        error_hash = get_serialized_object_errors(value)
+        error_hash = get_serialized_object_errors(record, value)
         add_errors_to_record(record, attribute, error_hash)
         ValidateableHash.clear_validators!
       end
 
-      def build_serialized_object(value)
+      def build_serialized_object(record, value)
         ValidateableHash.clear_validators!
-        ValidateableHash.new(value)
+        ValidateableHash.new(record, value)
       end
 
-      def get_serialized_object_errors(value)
-        serialized_object = build_serialized_object(value)
+
+      def get_serialized_object_errors(record, value)
+        serialized_object = build_serialized_object(record, value)
+
+        #test_method = Proc.new do |record2, &block|
+        #  @record3 = record2
+        #  def self.validates(method, *args, &block)
+        #    raise "bla" unless @record3.key?(method) || @record3.key?(method.to_s)
+        #  end
+        #  instance_eval(&block)
+        #end
+        #test_method.call(value, &@block)
+ 
+        #test_method = Proc.new do |record2, &block|
+        #  @keys = []
+        #  def self.validates(method, *args, &block)
+        #    @keys << method
+        #  end
+        #  instance_eval(&block)
+        #  @keys
+        #end
+        #binding.pry
+        #test_method.call(value, &@block)
+
         serialized_object.class_eval &@block
         serialized_object.valid?
         serialized_object.errors.messages

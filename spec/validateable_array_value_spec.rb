@@ -3,8 +3,9 @@ require 'spec_helper'
 describe ValidateableArrayValue do
   let!(:array) { [1, 2, 3] }
   let!(:value) { array.first }
+  let!(:record) { double }
 
-  subject { described_class.new(value) }
+  subject { described_class.new(record, value) }
 
   it "responds to valid?" do
     subject.should be_valid

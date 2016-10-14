@@ -9,18 +9,18 @@ module ActiveModel
 
       private
       def validate_each(record, attribute, value)
-        error_hash = get_serialized_object_errors(value)
+        error_hash = get_serialized_object_errors(record, value)
         add_errors_to_record(record, attribute, error_hash)
         ValidateableObject.clear_validators!
       end
 
-      def build_serialized_object(value)
+      def build_serialized_object(record, value)
         ValidateableObject.clear_validators!
-        ValidateableObject.new(value)
+        ValidateableObject.new(record, value)
       end
 
-      def get_serialized_object_errors(value)
-        serialized_object = build_serialized_object(value)
+      def get_serialized_object_errors(record, value)
+        serialized_object = build_serialized_object(record, value)
         serialized_object.class_eval &@block
         serialized_object.valid?
         serialized_object.errors.messages

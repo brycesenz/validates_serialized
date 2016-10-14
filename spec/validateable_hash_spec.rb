@@ -2,8 +2,9 @@ require 'spec_helper'
 
 describe ValidateableHash do
   let!(:hash) { { key_1: "boy", key_2: "girl" } }
+  let!(:record) { double }
 
-  subject { described_class.new(hash) }
+  subject { described_class.new(record, hash) }
 
   it "responds to valid?" do
     subject.should be_valid
