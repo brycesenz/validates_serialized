@@ -2,9 +2,12 @@ require 'active_model'
 
 class ValidateableObject
   include ::ActiveModel::Validations
+  attr_reader :record
 
-  def initialize(object)
+  def initialize(object, record)
     @object = object
+    @record = record
+    @record = @record.record while @record.is_a? ValidateableObject
   end
 
   def self.method_missing(method, *args, &block)

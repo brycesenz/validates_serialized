@@ -33,46 +33,14 @@ class Blog
 
   def initialize(h={})
     h.each {|k,v| send("#{k}=",v)}
+    @enforce_min_length = true
   end
 
-  def author
-    @author
-  end
+  attr_accessor :author, :ratings, :tags, :comments, :metadata, :data
+  attr_accessor :enforce_min_length
 
-  def author=(val)
-    @author = val
-  end
-
-  def ratings
-    @ratings
-  end
-
-  def ratings=(val)
-    @ratings = val
-  end
-
-  def tags
-    @tags
-  end
-
-  def tags=(val)
-    @tags = val
-  end
-
-  def comments
-    @comments
-  end
-
-  def comments=(val)
-    @comments = val
-  end
-
-  def metadata
-    @metadata
-  end
-
-  def metadata=(val)
-    @metadata = val
+  def needs_uuid?
+    true
   end
 
   validates_serialized :author do
@@ -86,18 +54,28 @@ class Blog
   end
 
   validates_each_in_array :metadata, if: :metadata do
-    validates_hash_keys :value do 
+    validates_hash_keys :value do
       validates :timestamp, presence: true
     end
   end
 
-  validates_hash_keys :comments, allow_blank: true do 
+  validates_hash_keys :comments, allow_blank: true do
     validates :admin, presence: true
   end
 
-  # validates_hash_keys :data, allow_blank: true do
-  #   validates :url, presence: true, if: Proc.new{|f| f.required_data_field?(:url) }
-  # end
+  validates_hash_keys :data, allow_blank: true do
+    validates :url, presence: true, if: Proc.new{ |hsh| hsh.needs_url }
+    validates :date, presence: true, if: Proc.new{ |hsh| hsh[:needs_date] }
+    validates :slug, presence: true, if: :needs_slug?
+    validates :uuid, presence: true, if: Proc.new{ |hsh| hsh.record.needs_uuid? }
+    validates_each_in_array :posts, allow_blank: true do
+      validates :value, length: { minimum: 5, if: Proc.new { |arr| arr.record.enforce_min_length } }
+    end
+
+    def needs_slug?
+      true
+    end
+  end
 end
 
 describe ValidatesSerialized do
@@ -153,5 +131,38 @@ describe ValidatesSerialized do
     model = Blog.new(ratings: [1, 3], author: Author.new(name: "Tom"), comments: { admin: "This is great!" }, tags: ["sweet", "awesome", "i"])
     model.should_not be_valid
     model.errors[:tags].should eq(["tags has a value that is too short (minimum is 4 characters)"])
+  end
+
+    it "is valid with dependent hash keys" do
+    model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"),
+                     data: { url: 'http://example.com',
+                             needs_url: true,
+                             date: 'yesterday',
+                             needs_date: true,
+                             slug: 'blog-name',
+                             uuid: '123-abc-456-def' })
+    model.should be_valid
+  end
+
+  it "is valid with dependent nested array values" do
+    model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"), data: { posts: %w[hello world fantastic], uuid: '123-abc-456-def', slug: 'blog-name' })
+    model.should be_valid
+
+    model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"), data: { posts: %w[wow], uuid: '123-abc-456-def', slug: 'blog-name' })
+    model.enforce_min_length = false
+    model.should be_valid
+  end
+
+  it "is invalid with missing dependent hash keys" do
+    model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"),
+                     data: { needs_url: true,
+                             needs_date: true })
+    model.should_not be_valid
+    model.errors.details[:data].map { |err| err[:error].split[0] }.sort.should eql %w[date slug url uuid]
+  end
+
+  it "is invalid with incorrect dependent nested array values" do
+    model = Blog.new(ratings: [1, 3, 1], author: Author.new(name: "Tom"), data: { posts: %w[wow], uuid: '123-abc-456-def', slug: 'blog-name' })
+    model.should_not be_valid
   end
 end
